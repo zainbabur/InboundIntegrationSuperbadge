@@ -38,7 +38,7 @@ global class AssetService {
                     
                     if ( claim.size() > 0 ) {
 
-                        return ERROR_MESSAGE_CLAIM_EXISTS;
+                        return String.format(ERROR_MESSAGE_CLAIM_EXISTS, new List<String>{claim[0].Name});
 
                     } else {
 
@@ -61,6 +61,8 @@ global class AssetService {
 
                 } else {
 
+                    asset[0].Status = 'Lost';
+                    update asset[0];
                     return ERROR_MESSAGE_NO_COVERAGE;
 
                 }
