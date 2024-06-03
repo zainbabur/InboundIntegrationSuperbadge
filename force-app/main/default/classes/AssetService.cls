@@ -19,8 +19,8 @@ global class AssetService {
             List<Asset> asset = [SELECT Id, Status 
                                 FROM Asset 
                                 WHERE Asset_Identifier__c = :assetIdentifier];
-            System.debug(asset);
             
+            //check if asset exists
             if ( asset.size() > 0 ) {
 
                 List<Insurance__c> insurance = [SELECT Id, Coverage__c, Active__c
@@ -29,6 +29,7 @@ global class AssetService {
                                                 AND Active__c = True
                                                 AND Asset__r.Id = :asset[0].Id];
                 
+                //does the asset have active, comprehensive coverage?
                 if ( insurance.size() > 0 ) {
 
                     List<Claim__c> claim = [SELECT Id, Name
@@ -36,11 +37,12 @@ global class AssetService {
                                             WHERE Asset__r.Asset_Identifier__c = :assetIdentifier
                                             AND Insurance__r.Id = :insurance[0].Id];
                     
+                    //does a claim already exist?
                     if ( claim.size() > 0 ) {
 
                         return String.format(ERROR_MESSAGE_CLAIM_EXISTS, new List<String>{claim[0].Name});
 
-                    } else {
+                    } else { //given that asset exists with valid insurance and no existing claim
 
                         asset[0].Status = 'Lost';
                         update asset[0];
@@ -59,7 +61,7 @@ global class AssetService {
 
                     }
 
-                } else {
+                } else { //given that asset does not have an insurance that covers loss
 
                     asset[0].Status = 'Lost';
                     update asset[0];
@@ -68,13 +70,13 @@ global class AssetService {
                 }
 
 
-            } else {
+            } else { //given that asset identifier provided does not exist in the system
 
                 return ERROR_MESSAGE_INVALID_IDENTIFIER;
 
             }
 
-        } else {
+        } else { //given that no asset identifier was provided in request
 
             return ERROR_MESSAGE_INVALID_IDENTIFIER;
 
